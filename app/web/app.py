@@ -19,7 +19,7 @@ class State(TypedDict):
 # сделать API методы для library
 # Подумать над error_response()
 # Проверить разницу между default и server_default при добавлении поля
-#
+
 
 @asynccontextmanager  # type: ignore[arg-type]
 async def lifespan(app: FastAPI) -> None:

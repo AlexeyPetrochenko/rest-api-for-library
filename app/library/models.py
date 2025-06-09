@@ -9,7 +9,7 @@ from app.store.db.sqlalchemy_db import BaseModel
 class AuthorModel(BaseModel):
     __tablename__ = "authors"
     author_id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(nullable=False)  # unique=True
+    name: Mapped[str] = mapped_column(nullable=False, unique=True)
 
 
 class BookModel(BaseModel):
@@ -19,9 +19,9 @@ class BookModel(BaseModel):
     title: Mapped[str] = mapped_column(nullable=False)
     author_id: Mapped[int] = mapped_column(ForeignKey("authors.author_id"))
     year: Mapped[int | None] = mapped_column(nullable=True)
-    isbn: Mapped[str | None] = mapped_column(nullable=True)  # unique=True
+    isbn: Mapped[str | None] = mapped_column(nullable=True, unique=True)
     amount: Mapped[int] = mapped_column(nullable=False, default=1)
-    # description: Mapped[str | None] = mapped_column(nullable=True, server_default="No description")
+    description: Mapped[str | None] = mapped_column(nullable=True, server_default="No description")
 
     __table_args__ = (
         CheckConstraint("amount >= 0", name="ck_books_amount_positive"),
@@ -33,7 +33,7 @@ class ReaderModel(BaseModel):
 
     reader_id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(nullable=False)
-    email: Mapped[str] = mapped_column(nullable=False)  # unique=True
+    email: Mapped[str] = mapped_column(nullable=False, unique=True)
 
 
 class LibraryCardModel(BaseModel):
