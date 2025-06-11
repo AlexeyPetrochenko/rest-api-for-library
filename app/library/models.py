@@ -43,4 +43,4 @@ class LibraryCardModel(BaseModel):
     reader_id: Mapped[int] = mapped_column(ForeignKey("readers.reader_id"))
     book_id: Mapped[int] = mapped_column(ForeignKey("books.book_id"))
     borrow_date: Mapped[datetime] = mapped_column(server_default=func.now())
-    return_data: Mapped[datetime | None] = mapped_column(nullable=True, default=None)
+    return_date: Mapped[datetime | None] = mapped_column(nullable=True, default=None)

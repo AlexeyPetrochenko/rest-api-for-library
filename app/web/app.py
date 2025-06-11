@@ -16,11 +16,6 @@ class State(TypedDict):
     store: Store
 
 
-# сделать API методы для library
-# Подумать над error_response()
-# Проверить разницу между default и server_default при добавлении поля
-
-
 @asynccontextmanager  # type: ignore[arg-type]
 async def lifespan(app: FastAPI) -> None:
     store = Store(load_from_env())

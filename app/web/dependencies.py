@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.store.library.repository import LibraryRepository
 from app.store.store import Store
+from app.web.config import BusinessConfig
 
 
 def get_store(request: Request) -> Store:
@@ -18,3 +19,7 @@ async def get_session(store: Annotated[Store, Depends(get_store)]) -> AsyncSessi
 
 def get_library_repo(store: Annotated[Store, Depends(get_store)]) -> LibraryRepository:
     return store.library_repo
+
+
+def get_business_config(store: Annotated[Store, Depends(get_store)]) -> BusinessConfig:
+    return store.config.business_config

@@ -26,5 +26,7 @@ async def handler_base_app_exc(request: Request, exc: AppBaseError) -> JSONRespo
             "status_code": exc.status_code,
             "status": HTTP_ERROR_CODES[exc.status_code],
             "detail": jsonable_encoder(exc.detail),
+            "error_name": exc.__class__.__name__,
+            "from_error": jsonable_encoder(exc.__cause__),
         }
     )

@@ -14,7 +14,9 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
         try:
             return await call_next(request)
         except Exception as e:
-            logger.error("Unhandled exception")
+            logger.error(
+                "Unhandled exception 500 - %s %s", request.method, request.url.path, exc_info=e
+            )
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={

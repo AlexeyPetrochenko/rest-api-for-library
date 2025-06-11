@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import Field
+from pydantic import EmailStr, Field
 
 from app.base.schemes import BaseScheme
 
@@ -27,19 +27,16 @@ class BookReadScheme(BookCreateScheme):
 
 class ReaderCreateScheme(BaseScheme):
     name: str
-    email: str
+    email: EmailStr
 
 
 class ReaderReadScheme(AuthorCreateScheme):
     reader_id: int
 
 
-class LibraryCardCreateSchemes(BaseScheme):
+class LibraryCardCSchemes(BaseScheme):
+    library_card_id: int
     reader_id: int
     book_id: int
-    return_data: datetime
-    borrow_date: datetime | None = Field(default=None)
-
-
-class LibraryCardReadSchemes(LibraryCardCreateSchemes):
-    library_card_id: int
+    borrow_date: datetime
+    return_date: datetime | None = Field(default=None)
