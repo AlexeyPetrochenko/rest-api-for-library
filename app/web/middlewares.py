@@ -22,6 +22,7 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
                 content={
                     "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
                     "status": "internal server error",
+                    "name_error": e.__class__.__name__,
                     "message": str(e),
                 }
             )

@@ -6,6 +6,9 @@ from pydantic import EmailStr
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.admin.schemes import AdminScheme
+from app.auth.bearer import AccessTokenBearer
+from app.library.repository import LibraryRepository
 from app.library.schemes import (
         AuthorCreateScheme,
         AuthorReadScheme,
@@ -15,14 +18,18 @@ from app.library.schemes import (
         ReaderCreateScheme,
         ReaderReadScheme,
 )
-from app.store.library.repository import LibraryRepository
 from app.web.config import BusinessConfig
-from app.web.dependencies import get_business_config, get_library_repo, get_session
+from app.web.dependencies import (
+        get_business_config,
+        get_library_repo,
+        get_session,
+)
 from app.web.exceptions import (
         AuthorNotFoundError,
         BookNotFoundError,
         BookUnavailableError,
         ConflictError,
+        EmailAlreadyTakenError,
         LibraryCardNotFoundError,
         MaxBooksLimitReachedError,
         ReaderNotFoundError,
@@ -77,6 +84,7 @@ async def add_book(
 async def get_books(
     repository: Annotated[LibraryRepository, Depends(get_library_repo)],
     session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[AdminScheme, Depends(AccessTokenBearer())],
 ) -> ResponseScheme[list[BookReadScheme]]:
     books = await repository.get_books(session)
     return ResponseScheme(data=list(books))
@@ -145,9 +153,7 @@ async def add_reader(
         logger.info("Reader with ID: [%s] successfully added", reader.reader_id)
     except SQLAlchemyError as e:
         logger.info("There is already an reader with this email [%s]", data_reader.email)
-        raise ConflictError(
-            status.HTTP_409_CONFLICT,
-            detail=f"There is already an reader with this email [{data_reader.email}]") from e
+        raise EmailAlreadyTakenError(data_reader.email) from e
     return ResponseScheme(data=reader)
 
 
@@ -199,9 +205,7 @@ async def update_reader(
         reader = await repository.update_reader(session, reader_id, name, email)
     except IntegrityError as e:
         logger.info("There is already an reader with this email [%s]", email)
-        raise ConflictError(
-            status.HTTP_409_CONFLICT,
-            detail=f"There is already an reader with this email [{email}]") from e
+        raise EmailAlreadyTakenError(email) from e  # type: ignore[arg-type]
     if reader is None:
         logger.warning("There is no reader with this ID: [%s]", reader_id)
         raise ReaderNotFoundError(reader_id)

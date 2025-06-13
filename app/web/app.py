@@ -3,6 +3,7 @@ from typing import TypedDict
 
 from fastapi import FastAPI
 
+from app.auth.routers import router as auth_router
 from app.library.routers import router as library_router
 from app.store.store import Store
 from app.web.config import load_from_env
@@ -29,7 +30,8 @@ def create_app() -> FastAPI:
     app = FastAPI(lifespan=lifespan)
 
     app.add_middleware(ErrorHandlingMiddleware)
-    app.add_exception_handler(AppBaseError, handler_base_app_exc)
+    app.add_exception_handler(AppBaseError, handler_base_app_exc)  # type: ignore[arg-type]
 
     app.include_router(library_router, tags=["library"])
+    app.include_router(auth_router, tags=["auth"])
     return app

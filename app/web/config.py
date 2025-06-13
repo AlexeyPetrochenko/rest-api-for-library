@@ -12,6 +12,12 @@ class Config(BaseSettings):
     DB_PORT: int
     DB_NAME: str
 
+    JWT_SECRET: str
+    JWT_ALGORITHM: str
+
+    JWT_EXP: int = 120  # seconds
+    REFRESH_JWT_EXP: int = 2  # days
+
     business_config: BusinessConfig = BusinessConfig()
 
     @property

@@ -3,9 +3,10 @@ from typing import Annotated, cast
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.store.library.repository import LibraryRepository
+from app.admin.repository import AdminRepository
+from app.library.repository import LibraryRepository
 from app.store.store import Store
-from app.web.config import BusinessConfig
+from app.web.config import BusinessConfig, Config
 
 
 def get_store(request: Request) -> Store:
@@ -21,5 +22,13 @@ def get_library_repo(store: Annotated[Store, Depends(get_store)]) -> LibraryRepo
     return store.library_repo
 
 
+def get_admin_repo(store: Annotated[Store, Depends(get_store)]) -> AdminRepository:
+    return store.admin_repo
+
+
 def get_business_config(store: Annotated[Store, Depends(get_store)]) -> BusinessConfig:
     return store.config.business_config
+
+
+def get_config(store: Annotated[Store, Depends(get_store)]) -> Config:
+    return store.config

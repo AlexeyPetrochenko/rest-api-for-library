@@ -1,7 +1,7 @@
 import logging
 import typing
 
-from sqlalchemy import and_, func, select, not_
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.library.models import (

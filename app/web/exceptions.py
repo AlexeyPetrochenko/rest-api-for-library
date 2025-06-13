@@ -19,6 +19,15 @@ class ConflictError(AppBaseError):
     """Raised when a resource with the same unique field already exists."""
 
 
+class EmailAlreadyTakenError(ConflictError):
+    def __init__(self, email: str) -> None:
+        super().__init__(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Account with this email: {email} is already taken",
+        )
+        self.email = email
+
+
 class NotFoundError(AppBaseError):
     """Raised when a resource does not exist."""
 
@@ -30,6 +39,7 @@ class AuthorNotFoundError(NotFoundError):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"There is no author with such ID: {author_id}"
         )
+        self.author_id = author_id
 
 
 class BookNotFoundError(NotFoundError):
@@ -39,6 +49,7 @@ class BookNotFoundError(NotFoundError):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"There is no book with this ID: {book_id}"
         )
+        self.book_id = book_id
 
 
 class ReaderNotFoundError(NotFoundError):
@@ -48,6 +59,7 @@ class ReaderNotFoundError(NotFoundError):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"There is no reader with such ID: {reader_id}"
         )
+        self.reader_id = reader_id
 
 
 class LibraryCardNotFoundError(NotFoundError):
@@ -57,6 +69,8 @@ class LibraryCardNotFoundError(NotFoundError):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"No record of book issue with such book_id: [{book_id}], reader_id: [{reader_id}]"
         )
+        self.book_id = book_id
+        self.reader_id = reader_id
 
 
 class BookUnavailableError(BusinessLogicError):
@@ -66,6 +80,7 @@ class BookUnavailableError(BusinessLogicError):
             status_code=status.HTTP_409_CONFLICT,
             detail=f"There is no instance of the book available. with this ID: {book_id}"
         )
+        self.book_id = book_id
 
 
 class MaxBooksLimitReachedError(BusinessLogicError):
@@ -75,6 +90,7 @@ class MaxBooksLimitReachedError(BusinessLogicError):
             status_code=status.HTTP_409_CONFLICT,
             detail=f"Reader ID: {reader_id}, has reached the maximum allowed number of borrowed books"
         )
+        self.reader_id = reader_id
 
 
 class BookAlreadyReturnedError(BusinessLogicError):
@@ -83,4 +99,37 @@ class BookAlreadyReturnedError(BusinessLogicError):
         super().__init__(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"Book with such book_id: [{book_id}], reader_id: [{reader_id}] already returned"
+        )
+        self.book_id = book_id
+        self.reader_id = reader_id
+
+
+class AuthError(AppBaseError):
+    """Base class for authentication/authorization errors."""
+
+
+class InvalidCredentialsError(AuthError):
+    """Incorrect username or password."""
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid login or password."
+        )
+
+
+class AccessTokenNotFoundError(AuthError):
+    """Raised when access token not provided"""
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Access token not provided"
+        )
+
+
+class InvalidAccessTokenError(AuthError):
+    """Raised when provided incorrect or expired access token"""
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access token incorrect or expired"
         )
