@@ -86,6 +86,23 @@ class LibraryRepository:
         result = await session.scalar(stm)
         return typing.cast(int, result)
 
+    # TODO: SQL запрос для получения книг читателей
+    # SELECT b.* FROM books as b
+    # JOIN library_cards as lc ON lc.book_id = b.book_id
+    # JOIN readers as r ON r.reader_id = lc.reader_id
+    # WHERE r.reader_id = {reader_id} AND lc.return_date IS NULL
+    async def get_books_for_reader(
+        self, session: AsyncSession, reader_id: int
+    ) -> typing.Sequence[BookModel]:
+        stm = (
+            select(BookModel)
+            .join(LibraryCardModel, BookModel.book_id == LibraryCardModel.book_id)
+            .join(ReaderModel, ReaderModel.reader_id == LibraryCardModel.reader_id)
+            .where(and_(ReaderModel.reader_id == reader_id, LibraryCardModel.return_date.is_(None)))
+        )
+        books = await session.scalars(stm)
+        return books.all()
+
     async def get_unreturned_library_record(
         self, session: AsyncSession, book_id: int, reader_id: int
     ) -> LibraryCardModel | None:
