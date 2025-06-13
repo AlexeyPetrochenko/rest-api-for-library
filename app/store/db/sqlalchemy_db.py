@@ -27,7 +27,7 @@ class Database:
         self.session_maker: async_sessionmaker[AsyncSession] | None = None
 
     async def connect(self) -> None:
-        self.engine = create_async_engine(url=self.store.config.ASYNC_DATABASE_URL)
+        self.engine = create_async_engine(url=self.store.config.ASYNC_DATABASE_URL, echo=True)
         self.session_maker = async_sessionmaker(bind=self.engine, expire_on_commit=False)
         logger.info("Connected to database")
 

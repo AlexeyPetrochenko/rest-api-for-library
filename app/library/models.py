@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import CheckConstraint, ForeignKey, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.store.db.sqlalchemy_db import BaseModel
 
@@ -27,6 +27,8 @@ class BookModel(BaseModel):
         CheckConstraint("amount >= 0", name="ck_books_amount_positive"),
     )
 
+    library_cards: Mapped[list["LibraryCardModel"]] = relationship(back_populates="book")
+
 
 class ReaderModel(BaseModel):
     __tablename__ = "readers"
@@ -34,6 +36,8 @@ class ReaderModel(BaseModel):
     reader_id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(nullable=False)
     email: Mapped[str] = mapped_column(nullable=False, unique=True)
+
+    library_cards: Mapped[list["LibraryCardModel"]] = relationship(back_populates="reader")
 
 
 class LibraryCardModel(BaseModel):
@@ -44,3 +48,6 @@ class LibraryCardModel(BaseModel):
     book_id: Mapped[int] = mapped_column(ForeignKey("books.book_id"))
     borrow_date: Mapped[datetime] = mapped_column(server_default=func.now())
     return_date: Mapped[datetime | None] = mapped_column(nullable=True, default=None)
+
+    reader: Mapped["ReaderModel"] = relationship(back_populates="library_cards")
+    book: Mapped["BookModel"] = relationship(back_populates="library_cards")

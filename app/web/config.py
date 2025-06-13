@@ -15,7 +15,7 @@ class Config(BaseSettings):
     JWT_SECRET: str
     JWT_ALGORITHM: str
 
-    JWT_EXP: int = 120  # seconds
+    JWT_EXP: int = 900  # seconds
     REFRESH_JWT_EXP: int = 2  # days
 
     business_config: BusinessConfig = BusinessConfig()

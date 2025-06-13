@@ -46,6 +46,7 @@ async def add_author(
     data_author: AuthorCreateScheme,
     repository: Annotated[LibraryRepository, Depends(get_library_repo)],
     session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[AdminScheme, Depends(AccessTokenBearer())],
 ) -> ResponseScheme[AuthorReadScheme]:
         try:
             author = await repository.add_author(session, data_author)
@@ -63,6 +64,7 @@ async def add_book(
     data_book: BookCreateScheme,
     repository: Annotated[LibraryRepository, Depends(get_library_repo)],
     session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[AdminScheme, Depends(AccessTokenBearer())],
 ) -> ResponseScheme[BookReadScheme]:
     try:
         book = await repository.add_book(session, data_book)
@@ -84,7 +86,6 @@ async def add_book(
 async def get_books(
     repository: Annotated[LibraryRepository, Depends(get_library_repo)],
     session: Annotated[AsyncSession, Depends(get_session)],
-    current_user: Annotated[AdminScheme, Depends(AccessTokenBearer())],
 ) -> ResponseScheme[list[BookReadScheme]]:
     books = await repository.get_books(session)
     return ResponseScheme(data=list(books))
@@ -95,6 +96,7 @@ async def get_book(
     book_id: int,
     repository: Annotated[LibraryRepository, Depends(get_library_repo)],
     session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[AdminScheme, Depends(AccessTokenBearer())],
 ) -> ResponseScheme[BookReadScheme]:
     book = await repository.get_book(session, book_id)
     if book is None:
@@ -108,6 +110,7 @@ async def del_book(
     book_id: int,
     repository: Annotated[LibraryRepository, Depends(get_library_repo)],
     session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[AdminScheme, Depends(AccessTokenBearer())],
 ) -> ResponseScheme[BookReadScheme]:
     book = await repository.del_book(session, book_id)
     if book is None:
@@ -124,6 +127,7 @@ async def update_book(
     book_id: Annotated[int, Path()],
     repository: Annotated[LibraryRepository, Depends(get_library_repo)],
     session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[AdminScheme, Depends(AccessTokenBearer())],
     title: Annotated[str | None, Body()] = None,
     author_id: Annotated[int | None, Body()] = None,
     year: Annotated[int | None, Body()] = None,
@@ -139,6 +143,17 @@ async def update_book(
         raise BookNotFoundError(book_id)
     logger.info("Book with this ID: [%s] has been updated successfully", book_id)
     return ResponseScheme(data=book)
+
+
+@router.get("/readers/{reader_id}/books", status_code=status.HTTP_200_OK)
+async def get_books_for_reader(
+    reader_id: int,
+    repository: Annotated[LibraryRepository, Depends(get_library_repo)],
+    session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[AdminScheme, Depends(AccessTokenBearer())],
+) -> ResponseScheme[BookReadScheme]:
+    books = await repository.get_books_for_reader(session, reader_id)
+    return ResponseScheme(data=list(books))
 
 
 # TODO: CRUD операции над Читателями Readers
@@ -161,6 +176,7 @@ async def add_reader(
 async def get_readers(
     repository: Annotated[LibraryRepository, Depends(get_library_repo)],
     session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[AdminScheme, Depends(AccessTokenBearer())],
 ) -> ResponseScheme[list[ReaderReadScheme]]:
     readers = await repository.get_readers(session)
     return ResponseScheme(list(readers))
@@ -171,6 +187,7 @@ async def get_reader(
     reader_id: int,
     repository: Annotated[LibraryRepository, Depends(get_library_repo)],
     session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[AdminScheme, Depends(AccessTokenBearer())],
 ) -> ResponseScheme[ReaderReadScheme]:
     reader = await repository.get_reader(session, reader_id)
     if reader is None:
@@ -184,6 +201,7 @@ async def del_reader(
     reader_id: int,
     repository: Annotated[LibraryRepository, Depends(get_library_repo)],
     session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[AdminScheme, Depends(AccessTokenBearer())],
 ) -> ResponseScheme[ReaderReadScheme]:
     reader = await repository.del_reader(session, reader_id)
     if reader is None:
@@ -198,6 +216,7 @@ async def update_reader(
     reader_id: Annotated[int, Path()],
     repository: Annotated[LibraryRepository, Depends(get_library_repo)],
     session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[AdminScheme, Depends(AccessTokenBearer())],
     name: Annotated[str | None, Body()] = None,
     email: Annotated[EmailStr | None, Body()] = None,
 ) -> ResponseScheme[ReaderReadScheme]:
@@ -213,13 +232,14 @@ async def update_reader(
 
 
 # TODO: Бизнес логика выдачи и возврата книг читателям
-@router.post("/books/{book_id}/readers/{reader_id}", status_code=status.HTTP_200_OK)
+@router.post("/readers/{reader_id}/borrow/{book_id}", status_code=status.HTTP_200_OK)
 async def borrow_book(
     book_id: int,
     reader_id: int,
     config: Annotated[BusinessConfig, Depends(get_business_config)],
     repository: Annotated[LibraryRepository, Depends(get_library_repo)],
     session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[AdminScheme, Depends(AccessTokenBearer())],
 ) -> ResponseScheme[LibraryCardCSchemes]:
     book = await repository.get_book(session, book_id)
 
@@ -247,12 +267,13 @@ async def borrow_book(
     return ResponseScheme(data=record)
 
 
-@router.put("/books/{book_id}/readers/{reader_id}", status_code=status.HTTP_200_OK)
+@router.post("/readers/{reader_id}/returns/{book_id}", status_code=status.HTTP_200_OK)
 async def return_book(
     book_id: int,
     reader_id: int,
     repository: Annotated[LibraryRepository, Depends(get_library_repo)],
     session: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[AdminScheme, Depends(AccessTokenBearer())],
 ) -> ResponseScheme[LibraryCardCSchemes]:
     record = await repository.get_unreturned_library_record(session, book_id, reader_id)
     if record is None:
