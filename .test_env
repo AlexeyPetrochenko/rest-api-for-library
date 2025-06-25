@@ -1,0 +1,8 @@
+DB_HOST=test_db
+DB_PORT=5433
+DB_USER=test_user
+DB_PASS=test_pass
+DB_NAME=test_library_db
+
+JWT_SECRET=test_secret_key
+JWT_ALGORITHM=HS256

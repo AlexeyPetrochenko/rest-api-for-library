@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from typing import TypedDict
 
 from fastapi import FastAPI
+from starlette.types import Lifespan
 
 from app.auth.routers import router as auth_router
 from app.library.routers import router as library_router
@@ -26,7 +27,7 @@ async def lifespan(app: FastAPI) -> None:
     await store.database.disconnect()
 
 
-def create_app() -> FastAPI:
+def create_app(lifespan: Lifespan = lifespan) -> FastAPI:
     app = FastAPI(lifespan=lifespan)
 
     app.add_middleware(ErrorHandlingMiddleware)

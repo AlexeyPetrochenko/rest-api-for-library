@@ -8,6 +8,8 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.store.db.sqlalchemy_db import BaseModel
 from app.web.config import load_from_env
+from app.admin.models import *
+from app.library.models import *
 
 config = context.config
 

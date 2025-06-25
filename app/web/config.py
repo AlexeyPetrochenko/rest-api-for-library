@@ -1,4 +1,5 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from dotenv import dotenv_values
+from pydantic_settings import BaseSettings
 
 
 class BusinessConfig(BaseSettings):
@@ -24,8 +25,14 @@ class Config(BaseSettings):
     def ASYNC_DATABASE_URL(self) -> str:  # noqa: N802
         return f'postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}'
 
-    model_config = SettingsConfigDict(env_file=".env")
 
-
+# TODO: Явно через dotenv_values указываем откуда загружать переменные окружения
 def load_from_env() -> Config:
-    return Config()  # type: ignore[call-arg]
+    data = dotenv_values(".env")
+    return Config(**data)  # type: ignore[arg-type]
+
+
+def load_from_test_env() -> Config:
+    data = dotenv_values(".test_env")
+    return Config(**data)  # type: ignore[arg-type]
+

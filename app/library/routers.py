@@ -179,7 +179,7 @@ async def get_readers(
     current_user: Annotated[AdminScheme, Depends(AccessTokenBearer())],
 ) -> ResponseScheme[list[ReaderReadScheme]]:
     readers = await repository.get_readers(session)
-    return ResponseScheme(list(readers))
+    return ResponseScheme(data=list(readers))
 
 
 @router.get("/readers/{reader_id}", status_code=status.HTTP_200_OK)
