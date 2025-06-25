@@ -15,6 +15,16 @@ services:
       - app-network
 
 
+  test_db:
+    image: postgres:17.0-alpine3.20
+    environment:
+      POSTGRES_DB: test_library_db
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_pass
+    ports:
+      - "5433:5432"
+
+
 
 networks:
   app-network:
